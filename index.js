@@ -1,7 +1,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createMercury } from './mercury.js';
+import { createVenus } from './venus.js';
+import { createMars } from './mars.js';
+import { createJupiter } from './jupiter.js';
+import { createSaturn } from './saturn.js';
  
 const loader = new THREE.TextureLoader();
+
+// Define astronomical units for consitent scaling
+const AU = 15; 
 
 //set up ma scene
 const scene = new THREE.Scene();
@@ -21,16 +29,25 @@ scene.add(sunLight);
 const fov = 75;
 const aspect = 2;
 const near = 0.1;
-const far = 100;
+const far = 1000;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-
+//all planets will be children of the sun to orbit around it
 const sunGeometry = new THREE.IcosahedronGeometry(1, 12);
 const sunMaterial = new THREE.MeshBasicMaterial({
     map: loader.load('sunmap.jpg'),
 });
 const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+// Sun's radius is about 109 times Earth's radius, but scaled down for visualization
+sunMesh.scale.set(7, 7, 7);
 scene.add(sunMesh);
+
+// Import planets from their respective files with AU
+const { mercuryObj, mercuryMesh } = createMercury(scene, loader, AU);
+const { venusObj, venusMesh } = createVenus(scene, loader, AU);
+const { marsObj, marsMesh } = createMars(scene, loader, AU);
+const { jupiterObj, jupiterMesh } = createJupiter(scene, loader, AU);
+const { saturnObj, saturnMesh, ringMesh } = createSaturn(scene, loader, AU);
 
 //make earth inherit from parent object
 const earthObj = new THREE.Object3D();
@@ -40,7 +57,10 @@ const earthMaterial = new THREE.MeshStandardMaterial({
      map: loader.load('earthmap1k.jpg'),
 })
 const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
-earthMesh.position.set(0, 0, 10);
+//axial tilt of earth
+earthMesh.rotation.y = -23.1 * Math.PI / 2;
+// Earth at 0.5 AU
+earthMesh.position.set(0, 0, 0.5 * AU);
 earthObj.add(earthMesh);
 
 //make moonObj
@@ -55,9 +75,9 @@ const moonMaterial = new THREE.MeshStandardMaterial({
     map: loader.load('moonmap1k.jpg'),
 });
 const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+// Moon is about 0.00257 AU from Earth (scaled for visibility)
 moonMesh.position.set(2.5, 0, 0);
 moonObj.add(moonMesh);
-
 sunMesh.add(earthObj);
 
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
@@ -77,7 +97,7 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-camera.position.set(0, 20, 0);
+camera.position.set(0, 100, 0);
 controls.update();
 
 
@@ -90,9 +110,28 @@ function render(time) {
     controls.update();
 
     sunMesh.rotation.y += 0.001;
+
     earthMesh.rotation.y += 0.01;
-    earthObj.rotation.y += 0.01;
+    earthObj.rotation.y += 0.006;
+    
+    moonMesh.rotation.y += 0.02
     moonObj.rotation.y += 0.05;
+    
+    mercuryObj.rotation.y += 0.1;
+    mercuryMesh.rotation.y += 0.01;
+
+    venusObj.rotation.y += 0.07
+    venusMesh.rotation.y += 0.01;
+
+    marsObj.rotation.y += 0.03
+    marsMesh.rotation.y += 0.01;
+
+    jupiterObj.rotation.y += 0.02;
+    jupiterMesh.rotation.y += 0.01;
+    
+    // Add Saturn's rotation
+    saturnObj.rotation.y += 0.005;
+    saturnMesh.rotation.y += 0.01;
 
     renderer.render(scene, camera);
 
