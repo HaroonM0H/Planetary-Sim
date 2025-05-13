@@ -13,8 +13,27 @@ export function createSaturn(scene, loader, AU) {
     // Saturn is about 9.5 times Earth's radius, scaled for visibility
     saturnMesh.scale.set(5.5, 5.5, 5.5);
     
-    // Create Saturn's rings
+    // Create Saturn's rings with proper UV mapping
     const ringGeometry = new THREE.RingGeometry(1.8, 3, 64);
+    
+    // Fix the UV mapping for the ring texture
+    const pos = ringGeometry.attributes.position;
+    const v3 = new THREE.Vector3();
+    const uv = ringGeometry.attributes.uv;
+    
+    for (let i = 0; i < pos.count; i++) {
+        v3.fromBufferAttribute(pos, i);
+        
+        // Calculate the angle around the ring (0 to 2π)
+        const angle = Math.atan2(v3.y, v3.x);
+        const u = (angle + Math.PI) / (Math.PI * 2);
+        
+        // Calculate the distance from the center (normalized between inner and outer radius)
+        const v = (Math.sqrt(v3.x * v3.x + v3.y * v3.y) - 1.8) / (3 - 1.8);
+        
+        uv.setXY(i, u, v);
+    }
+    
     const ringMaterial = new THREE.MeshBasicMaterial({
         map: loader.load('saturnringcolor.jpg'),
         side: THREE.DoubleSide,

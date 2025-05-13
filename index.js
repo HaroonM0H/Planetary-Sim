@@ -5,7 +5,10 @@ import { createVenus } from './venus.js';
 import { createMars } from './mars.js';
 import { createJupiter } from './jupiter.js';
 import { createSaturn } from './saturn.js';
- 
+import { createUranus } from './uranus.js';
+import { createNeptune } from './neptune.js';
+import getStarfield from './getStarfield.js';
+
 const loader = new THREE.TextureLoader();
 
 // Define astronomical units for consitent scaling
@@ -42,12 +45,18 @@ const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
 sunMesh.scale.set(7, 7, 7);
 scene.add(sunMesh);
 
-// Import planets from their respective files with AU
+// Import planets from their respective files 
 const { mercuryObj, mercuryMesh } = createMercury(scene, loader, AU);
 const { venusObj, venusMesh } = createVenus(scene, loader, AU);
 const { marsObj, marsMesh } = createMars(scene, loader, AU);
 const { jupiterObj, jupiterMesh } = createJupiter(scene, loader, AU);
 const { saturnObj, saturnMesh, ringMesh } = createSaturn(scene, loader, AU);
+const { uranusObj, uranusMesh, ringMesh: uranusRingMesh } = createUranus(scene, loader, AU);
+const { neptuneObj, neptuneMesh } = createNeptune(scene, loader, AU);
+
+//stars
+const starfield = getStarfield();
+scene.add(starfield);
 
 //make earth inherit from parent object
 const earthObj = new THREE.Object3D();
@@ -62,6 +71,7 @@ earthMesh.rotation.y = -23.1 * Math.PI / 2;
 // Earth at 0.5 AU
 earthMesh.position.set(0, 0, 0.5 * AU);
 earthObj.add(earthMesh);
+
 
 //make moonObj
 const moonObj = new THREE.Object3D();
@@ -129,9 +139,16 @@ function render(time) {
     jupiterObj.rotation.y += 0.02;
     jupiterMesh.rotation.y += 0.01;
     
-    // Add Saturn's rotation
     saturnObj.rotation.y += 0.005;
     saturnMesh.rotation.y += 0.01;
+    
+    uranusObj.rotation.y += 0.004;
+    uranusMesh.rotation.y += 0.01;
+    
+    neptuneObj.rotation.y += 0.003;
+    neptuneMesh.rotation.y += 0.01;
+
+
 
     renderer.render(scene, camera);
 
